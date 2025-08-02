@@ -1,0 +1,13 @@
+conda create -n flye_env python=3.8
+conda activate flye_env
+conda install bioconda::flye
+
+gunzip /mnt/d/Paper_Reproduction/01_Raw_Data/nstu_reads_fastq.gz
+
+
+flye --iterations 5 \
+     -t 4 \
+     -o /mnt/d/Paper_Reproduction/03_Assembly/flye_output \
+     --scaffold \
+     --read-error 0.03 \
+     --nano-hq /mnt/d/Paper_Reproduction/01_Raw_Data/nstu_reads.fastq
