@@ -1,0 +1,9 @@
+cd /mnt/d/Paper_Reproduction/03_Assembly/flye_output
+
+ls
+
+cat flye.log
+
+echo "$strain   $assemblysize   $coverage       $fragments      $N50" >> /mnt/d/Paper_Reproduction/03_Assembly/assembly_statistics.txt
+
+
