@@ -1,0 +1,19 @@
+conda install -c bioconda prokka
+
+prokka --outdir /mnt/d/Paper_Reproduction/05_Annotation \
+       --prefix nstu_annotation \
+       --force \
+       /mnt/d/Paper_Reproduction/03_Assembly/flye_output/assembly.fasta
+
+conda install -c bioconda abricate
+
+abricate --setupdb
+
+abricate --db card /mnt/d/Paper_Reproduction/05_Annotation/nstu_annotation.ffn > card_results.tab
+
+cp card_results.tab /mnt/d/Paper_Reproduction/05_Annotation/
+
+abricate --db vfdb /mnt/d/Paper_Reproduction/05_Annotation/nstu_annotation.ffn > vfdb_results.tab
+
+
+sudo apt install artemis
