@@ -1,0 +1,8 @@
+pip install quast
+
+quast.py /mnt/d/Paper_Reproduction/03_Assembly/flye_output/assembly.fasta -o /mnt/d/Paper_Reproduction/04_Assembly_Validation/quast_results
+
+
+
+
+
