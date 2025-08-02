@@ -1,6 +1,0 @@
-curl -OL https://github.com/ncbi/pgap/raw/prod/scripts/pgap.py
-
-chmod +x pgap.py
-./pgap.py --update
-
-./pgap.py -r -o /mnt/d/Paper_Reproduction/05_Annotation/PGAP_results -g /mnt/d/Paper_Reproduction/03_Assembly/flye_output/assembly.fasta -s 'Pantoea' 
