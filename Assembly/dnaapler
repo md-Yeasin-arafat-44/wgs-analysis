@@ -1,0 +1,13 @@
+cd /mnt/d/Paper_Reproduction/03_Assembly/flye_output
+
+
+
+awk '$4 == "N"' assembly_info.txt | cut -f 1 > rotate_ignore_list
+
+
+pip install dnaapler
+
+conda install -c bioconda mmseqs2
+
+
+dnaapler all --ignore /mnt/d/Paper_Reproduction/03_Assembly/flye_output/rotate_ignore_list --input /mnt/d/Paper_Reproduction/03_Assembly/flye_output/assembly.fasta --output /mnt/d/Paper_Reproduction/03_Assembly/flye_output/rotated --prefix strain1 --threads 8 -f
