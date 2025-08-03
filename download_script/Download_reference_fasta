@@ -1,0 +1,17 @@
+conda install -c conda-forge -c bioconda ncbi-datasets-cli
+
+nano accessions.txt
+
+datasets download genome accession \
+  --inputfile /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/accessions.txt \
+  --include genome \
+  --filename /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/all_genomes.zip
+
+
+unzip -t /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/all_genomes.zip
+
+cd /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis
+
+find all_genomes/ -name "*.fna" -exec cp {} fasta/ \;
+
+
