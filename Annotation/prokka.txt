@@ -1,0 +1,13 @@
+conda install -c bioconda prokka
+
+
+prokka --setupdb
+
+for f in /mnt/d/Paper_Reproduction/05_Annotation/prokka_annonation/fasta/*.{fasta,fna}; do
+    name=$(basename "$f")
+    name="${name%.*}"
+    prokka --outdir /mnt/d/Paper_Reproduction/05_Annotation/prokka_annonation/prokka_output/$name --prefix $name "$f"
+done
+
+
+find /mnt/d/Paper_Reproduction/05_Annotation/prokka_annonation/prokka_output/ -name "*.gff" -exec cp {} /mnt/d/Paper_Reproduction/05_Annotation/prokka_annonation/gff_for_roary/ \;
