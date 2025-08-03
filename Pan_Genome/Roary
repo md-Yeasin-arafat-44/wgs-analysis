@@ -1,0 +1,3 @@
+sudo apt install roary
+
+roary -e --mafft -p 6 *.gff
