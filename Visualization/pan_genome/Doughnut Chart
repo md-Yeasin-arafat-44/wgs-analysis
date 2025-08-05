@@ -1,0 +1,14 @@
+
+gene_class <- data.frame(
+  category = c("Core Genes", "Accessory Genes", "Singletons"),
+  count = c(core_genes, accessory_genes, singleton_genes)
+)
+gene_class$fraction <- gene_class$count / sum(gene_class$count)
+
+p0 <- ggplot(gene_class, aes(x = "", y = fraction, fill = category)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  ggtitle("PIRATE Gene Classification (Core / Accessory / Singleton)")
+
+print(p0)
