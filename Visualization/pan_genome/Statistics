@@ -1,0 +1,46 @@
+# Load required libraries
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(doParallel)
+library(ggpubr)
+
+# Load data
+PIRATE.gene_families <- fread("D:/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.originalIDs.tsv")
+
+# Calculate number of genomes per gene family
+PIRATE.gene_families$number_genomes <- rowSums(!(PIRATE.gene_families[, 23:ncol(PIRATE.gene_families)] == ""))
+PIRATE.gene_families <- PIRATE.gene_families[PIRATE.gene_families$number_genomes > 0, ]
+
+# Total gene families
+n_gene_fams <- nrow(PIRATE.gene_families)
+
+# Exclude metadata columns
+cols_to_exclude <- c("allele_name", "gene_family", "consensus_gene_name", "consensus_product", 
+                     "threshold", "alleles_at_maximum_threshold", "number_genomes", "average_dose", 
+                     "min_dose", "max_dose", "genomes_containing_fissions", "genomes_containing_duplications", 
+                     "number_fission_loci", "number_duplicated_loci", "no_loci", "products", 
+                     "gene_names", "min_length(bp)", "max_length(bp)", "average_length(bp)", 
+                     "cluster", "cluster_order")
+strains_only <- PIRATE.gene_families[, !names(PIRATE.gene_families) %in% cols_to_exclude]
+strain_names <- names(strains_only)
+
+# Number of genomes
+ngenomes <- length(strain_names)
+
+# Core genes present in >=95% genomes
+cutoff <- round(0.95 * ngenomes)
+n_gene_fams_core_w95per <- sum(PIRATE.gene_families$number_genomes >= cutoff)
+
+# Singleton genes present in only 1 genome
+n_gene_fams_singletons <- sum(PIRATE.gene_families$number_genomes == 1)
+
+# Accessory genes
+n_accessory <- n_gene_fams - (n_gene_fams_singletons + n_gene_fams_core_w95per)
+
+# Assign variables for plotting
+core_genes <- n_gene_fams_core_w95per
+accessory_genes <- n_accessory
+singleton_genes <- n_gene_fams_singletons
+
+
