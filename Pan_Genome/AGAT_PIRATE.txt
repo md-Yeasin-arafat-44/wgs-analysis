@@ -1,0 +1,32 @@
+find /mnt/d/Paper_Reproduction/05_Annotation/prokka_annonation/prokka_output/ -name "*.gff" -exec cp {} /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/input/ \;
+
+
+for f in *.gff; do
+  filename=$(basename "$f")
+  echo " Processing $filename ..."
+  mkdir -p ../processed
+  agat_sp_fix_overlaping_genes.pl --gff "$f" --output "../processed/fixed_$filename"
+  agat_sp_manage_attributes.pl --gff "../processed/fixed_$filename" --output "../processed/final_$filename"
+done
+
+
+mkdir -p pirate/input
+cd pirate/input
+
+
+cp /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/processed/*.gff /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/input
+
+
+
+~/tools/pirate/PIRATE/bin/PIRATE -i /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/input -o /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output -t 5
+
+
+
+mkdir -p /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/parsed_gffs/
+
+for file in /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/modified_gffs/*.gff; do
+  perl ~/tools/pirate/PIRATE/scripts/parse_GFF.pl "$file" \
+  /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/parsed_gffs/
+done
+
+

@@ -1,0 +1,32 @@
+wget https://raw.githubusercontent.com/SionBayliss/PIRATE/master/tools/subsetting/subsample_outputs.pl
+wget https://raw.githubusercontent.com/SionBayliss/PIRATE/master/tools/convert_format/PIRATE_to_Rtab.pl
+wget https://raw.githubusercontent.com/SionBayliss/PIRATE/master/tools/convert_format/paralogs_to_Rtab.pl
+wget https://raw.githubusercontent.com/SionBayliss/PIRATE/master/tools/convert_format/PIRATE_to_roary.pl
+wget https://raw.githubusercontent.com/SionBayliss/PIRATE/master/tools/convert_format/align_feature_sequences_mod.pl
+
+
+perl ~/tools/pirate/PIRATE/tools/subsetting/subsample_outputs.pl \
+  -i /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.tsv \
+  -g /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/modified_gffs/ \
+  -o /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.originalIDs.tsv \
+  --field "prev_ID" \
+  --feature "CDS"
+
+perl ~/tools/pirate/PIRATE/tools/convert_format/PIRATE_to_Rtab.pl \
+  -i /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.originalIDs.tsv \
+  -o /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.originalIDs.genePA.tsv
+
+
+perl ~/tools/pirate/PIRATE/tools/convert_format/paralogs_to_Rtab.pl \
+  -i /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.originalIDs.tsv \
+  -o /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.originalIDs.genePAparalogs.tsv \
+  --type d
+
+perl ~/tools/pirate/PIRATE/tools/convert_format/PIRATE_to_roary.pl \
+  -i /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.originalIDs.tsv \
+  -o /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.originalIDs.roary.tsv
+
+perl ~/tools/pirate/PIRATE/scripts/align_feature_sequences.pl \
+  -i /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.tsv \
+  -o /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/all_sequences \
+  -g /mnt/d/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/modified_gffs/
