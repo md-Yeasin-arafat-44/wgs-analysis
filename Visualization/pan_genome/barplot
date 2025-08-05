@@ -1,0 +1,43 @@
+library(data.table)
+library(dplyr)
+library(ggplot2)
+
+# Data load
+PIRATE.gene_families <- fread("D:/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.originalIDs.tsv")
+
+# Calculate number of genomes per gene family (non-empty entries from 23rd column onward)
+PIRATE.gene_families$number_genomes <- rowSums(!(PIRATE.gene_families[, 23:ncol(PIRATE.gene_families)] == ""))
+PIRATE.gene_families <- PIRATE.gene_families[PIRATE.gene_families$number_genomes > 0, ]
+
+# Number of genomes total
+strains_only <- PIRATE.gene_families[, 23:ncol(PIRATE.gene_families), with = FALSE]
+ngenomes <- length(names(strains_only))
+
+# Cutoff for core genes (95% genomes)
+cutoff <- round(0.95 * ngenomes)
+
+# Prepare dataframe for plotting
+gene_fam_totals <- data.frame(count = PIRATE.gene_families$number_genomes)
+
+# Assign group based on count
+gene_fam_totals$group <- ifelse(
+  gene_fam_totals$count == 1, "Singleton",
+  ifelse(gene_fam_totals$count >= cutoff, "Core", "Accessory")
+)
+
+# Convert group to factor with desired order for consistent coloring/legend
+gene_fam_totals$group <- factor(gene_fam_totals$group, levels = c("Singleton", "Accessory", "Core"))
+
+# Plot barplot
+p1 <- ggplot(gene_fam_totals, aes(x = count)) +
+  geom_bar(aes(fill = group), position = "identity") +
+  ggtitle("Pangenome Distribution by Gene Ortholog Group") +
+  ylab("Number of Gene Families") +
+  xlab("Number of Genomes Containing Gene Family") +
+  scale_fill_manual(values = c("Singleton" = "blueviolet", "Accessory" = "skyblue", "Core" = "darkcyan")) +
+  theme_classic() +
+  theme(plot.title = element_text(size = 15),
+        legend.title = element_blank(),
+        legend.position = c(0.85, 0.85))
+
+print(p1)
