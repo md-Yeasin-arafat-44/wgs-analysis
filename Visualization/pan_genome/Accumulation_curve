@@ -1,0 +1,104 @@
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(doParallel)
+library(foreach)
+
+# Load your data (replace path)
+PIRATE.gene_families <- fread("D:/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.originalIDs.tsv")
+
+# Prepare binary presence-absence matrix (genomes as columns from 23rd col onward)
+strains_only <- PIRATE.gene_families[, 23:ncol(PIRATE.gene_families), with=FALSE]
+
+# Convert to binary matrix: 1 if gene present, 0 if absent
+binary_df <- strains_only %>% mutate_all(~ as.numeric(nzchar(.)))
+
+# Function to count number of genes present in ALL selected genomes
+count_all_ones <- function(df) {
+  num_cols <- ncol(df)
+  sum(rowSums(df) == num_cols)
+}
+
+# Function to count common genes given subset of columns (genomes)
+find_common_genes <- function(df, cols) {
+  count_all_ones(df[cols])
+}
+
+# Initialize parallel backend
+cores <- detectCores()
+cl <- makeCluster(cores - 2)
+registerDoParallel(cl)
+
+result_list <- list()
+
+set.seed(123)  # for reproducibility
+
+# For each number of genomes from 2 to total
+for (num_genomes in 2:ncol(binary_df)) {
+  print(paste("Processing", num_genomes, "genomes"))
+  
+  # Generate 1000 random samples of genomes of size num_genomes
+  rand_combs <- replicate(1000, sample(names(binary_df), num_genomes), simplify = FALSE)
+  
+  # Parallel processing to calculate common and total genes
+  local_results <- foreach(i = seq_along(rand_combs), .combine = rbind, .packages = 'dplyr') %dopar% {
+    subset_cols <- rand_combs[[i]]
+    common_genes_count <- find_common_genes(binary_df, subset_cols)
+    total_genes_count <- sum(rowSums(binary_df[subset_cols]) > 0)
+    data.frame(NumGenomes = num_genomes, CommonGenes = common_genes_count, TotalGenes = total_genes_count)
+  }
+  
+  result_list[[num_genomes - 1]] <- local_results
+}
+
+stopCluster(cl)
+
+# Combine results into one dataframe
+results <- do.call(rbind, result_list)
+
+# Log-transform for power-law fitting
+results <- results %>%
+  mutate(log_NumGenomes = log(NumGenomes),
+         log_CommonGenes = log(CommonGenes),
+         log_TotalGenes = log(TotalGenes))
+
+# Linear model for core genes
+lm_model_common <- lm(log_CommonGenes ~ log_NumGenomes, data = results)
+
+# Linear model for total genes (pangenome)
+lm_model_all <- lm(log_TotalGenes ~ log_NumGenomes, data = results)
+
+# Extract coefficients
+intercept_common <- coef(lm_model_common)[1]
+slope_common <- coef(lm_model_common)[2]
+
+intercept_all <- coef(lm_model_all)[1]
+slope_all <- coef(lm_model_all)[2]
+
+# Create fitted values using power law model
+results <- results %>%
+  mutate(FittedCommonGenes = exp(intercept_common) * NumGenomes^slope_common,
+         FittedAllGenes = exp(intercept_all) * NumGenomes^slope_all)
+
+# Plot core genome accumulation curve
+p3 <- ggplot(results, aes(x = NumGenomes, y = CommonGenes)) +
+  geom_point(color = "grey", size = 2) +
+  geom_line(aes(y = FittedCommonGenes), color = "red", size = 1) +
+  labs(title = "Core Gene Accumulation Curve",
+       x = "Number of Genomes Compared",
+       y = "Number of Common Genes") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Plot pangenome accumulation curve
+p4 <- ggplot(results, aes(x = NumGenomes, y = TotalGenes)) +
+  geom_point(color = "grey", size = 2) +
+  geom_line(aes(y = FittedAllGenes), color = "red", size = 1) +
+  labs(title = "Pan Genome Accumulation Curve",
+       x = "Number of Genomes Compared",
+       y = "Number of Total Genes") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+print(p3)
+print(p4)
