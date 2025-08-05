@@ -1,0 +1,28 @@
+library(data.table)
+
+
+PIRATE.gene_families <- as.data.frame(fread(
+  "D:/Paper_Reproduction/07_Pan_Genome_Analysis/Roary/AGAT_PIRATE/pirate/output/PIRATE.gene_families.ordered.originalIDs.tsv"
+))
+
+
+PIRATE.gene_families$number_genomes <- rowSums(
+  PIRATE.gene_families[ , 23:ncol(PIRATE.gene_families)] != ""
+)
+
+
+PIRATE.gene_families <- PIRATE.gene_families[
+  PIRATE.gene_families$number_genomes > 0, ]
+
+
+head(PIRATE.gene_families)
+
+
+gene_total <- colSums(PIRATE.gene_families[ , 23:ncol(PIRATE.gene_families)] != "")
+
+
+hist(gene_total,
+     main = "Gene Distribution Across Genomes",
+     xlab = "Number of Genes",
+     ylab = "Number of Genomes",
+     col = "steelblue", border = "white")
